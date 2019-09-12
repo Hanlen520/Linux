@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @File    :   ${NAME}
+# @File    :   01_cat_system_info.sh
 # @Time    :   2019/9/9 7:55
 # @Author  :   Crisimple
 # @Github :    https://crisimple.github.io/
