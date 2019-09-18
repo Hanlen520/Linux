@@ -120,17 +120,96 @@ fi
 #       -G file 检查file是否存在并且默认组与当前用户相同
 #       file1 -nt file2 检查file1是否比file2新
 #       file1 -ot file2 检查file1是否比file2旧
+user_home="/home/ubuntu"
+if [[ -d ${user_home} ]]
+then
+    echo "The ${user_home} directory exists"
+    cd ${user_home}
+    ls
+else
+    echo "The ${user_home} directory does not exists"
+fi
+
+location=$HOME
+file_of_location="bash"
+if [[ -e ${location} ]]
+then
+    echo "The ${location} is exists"
+    echo "Now checking on the file, ${file_of_location}"
+    if [[ -e ${file_of_location} ]]
+    then
+        echo "Ok on the file"
+        echo "Updating the date..."
+        date >> "../tests/file.log"
+    else
+        echo "File is not exists"
+        echo "Nothing to update"
+    fi
+fi
 
 # ================================================================================
-# 4.
+# 4.复合条件测试
+#    [ condition1 ] && [ condition2 ]
+#    [ condition1 ] || [ condition2 ]
+if [[ -d ${HOME} ]] && [[ -d bash ]]
+then
+    echo "****Two file is exists*****"
+else
+    echo "=====Not both are exists====="
+fi
 
+if [[ -d ${HOME} ]] || [[ -d bashs ]]
+then
+    echo "****have file is exists*****"
+else
+    echo "=====Not file is exists====="
+fi
 
 # ================================================================================
-# 5. 复合条件测试
+# 5.高级特性
+#   双括号 --- 里面可以是任意的数学赋值或比较表达式
+#       val++ 后增
+#       val-- 后减
+#       ++val 先增
+#       --val 先减
+#       ! 逻辑求反
+#       ~ 位求反
+#       ** 幂运算
+#       << 左位移
+#       >> 右位移
+#       & 位布尔和
+#       | 位布尔或
+#       && 逻辑和
+#       || 逻辑或
+var51=10
+if (( ${var51} ** 2 > 20 ))
+then
+    (( var511 = ${var51} ** 3 ))
+    echo "The three square is ${var511}"
+fi
+#   双方括号 --- 双方括号命令提供了针对字符串比较的高级特性
+if [[ ${USER} == u* ]]
+then
+    echo "Hello ${USER}"
+else
+    echo "byebye le nin lei"
+fi
 
 
 # ================================================================================
 # 6. case命令
+#   case命令会采用列表格式来检查单个变量的多个值。
+case ${USER} in
+ubuntu)
+    echo "Hello ${USER}";;
+test)
+    echo "Hello test";;
+1 | 2)
+    echo "what";;
+*)
+    echo "Sorry";;
+esac
+
 
 
 # ================================================================================
