@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @File    :   09_use_editor.sh
+# @File    :   10_use_editor.sh
 # @Time    :   2019/9/15 14:06
 # @Author  :   Crisimple
 # @Github :    https://crisimple.github.io/

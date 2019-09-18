@@ -1,0 +1,3 @@
+/mingw64/bin:/usr/bin:/c/Users/jiangheng/bin:/c/Program Files/Python37/Scripts:/c/Program Files/Python37:/c/Windows/system32:/c/Windows:/c/Windows/System32/Wbem:/c/Windows/System32/WindowsPowerShell/v1.0:/c/Windows/System32/OpenSSH:/cmd:/c/Program Files/Mozilla Firefox:/c/Users/jiangheng/AppData/Local/Microsoft/WindowsApps:/c/Program Files/PyCharm/bin:/c/Program Files/Fiddler:/c/Program Files/IntelliJ IDEA/bin
+Wed Sep 18 11:57:07     2019
+jiangheng

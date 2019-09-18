@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @File    :   07_manage_file_system.sh
+# @File    :   08_manage_file_system.sh
 # @Time    :   2019/9/14 19:00
 # @Author  :   Crisimple
 # @Github :    https://crisimple.github.io/

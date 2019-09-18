@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @File    :   05_environment_variable.sh
+# @File    :   06_environment_variable.sh
 # @Time    :   2019/9/14 12:31
 # @Author  :   Crisimple
 # @Github :    https://crisimple.github.io/
