@@ -267,23 +267,166 @@ do
         echo "sorry"
     fi
 done
+# ---------------------------------------------------------------------------
+# 7.7 C语言风格的for命令
+for (( i=1; i<=9; i++ ))
+do
+#    echo "the i is: ${i}"
+    for ((j=i; j<=9; j++))
+    do
+#        echo "The j is ${j}"
+#        result=$(( ${i} * ${j} ))
+#        echo "${i} * ${j} = ${result}"
+        echo -en "\t${i} * ${j}" = `expr ${i} \* ${j}`
+    done
+    echo " "
+done
+
+for (( a=1, b=10; a<=10; a++, b-- ))
+do
+#    echo ${a} - ${b} = `expr ${a} - ${b}`
+    echo ${a} - ${b} = $(( ${a} - ${b} ))
+done
 
 
 # ================================================================================
 # 8. while命令
+var81=10
+while echo ${var81}; [[ ${var81} -ge 0 ]]
+do
+#    echo ${var81}
+#    var81=$[ ${var81} - 1 ]
+    echo -n "inside loop is:"
+    var81=$[ ${var81} - 1 ]
+done
 
 
 # ================================================================================
 # 9. until命令
+#   和while和相似，也可以跟多个测试命令
+#   until命令和while命令工作的方式完全相反。until命令要求你指定一个通常返回非零退出状态码的测试命令。
+#   只有测试命令的退出状态码不为0，bash shell才会执行循环中列出的命令。一旦测试命令返回了退出状态码0，循环就结束了。
+var9=100
+until [[ ${var9} -eq 0 ]]
+do
+    echo ${var9}
+    echo $?
+    var9=$[ ${var9} - 25]
+done
 
 
 # ================================================================================
 # 10. 循环嵌套
+#   循环语句可以在循环内使用任意类型的命令，包括其他循环命令。
+for (( a=1; a<=3; a++ ))
+do
+    echo -e "First loop a is ${a}"
+    for (( b=1; b<=3; b++ ))
+    do
+        echo -e "\tSecond loop b is ${b}"
+        var101=100
+        if [[ ${var101} -lt 0 ]]
+        then
+            echo "The third floor ${b}"
+            b=$[ ${b} - 100 ]
+        else
+            echo -e "\t\t Haaaaa~"
+        fi
+    done
+done
+
+for test in $(echo $PATH)
+do
+    echo ${test}
+done
+
 
 
 # ================================================================================
 # 11. 控制循环
+# break命令
+#   跳出单个循环
+for test in 1 2 3 4 5 6
+do
+    if [[ ${test} -eq 3 ]]
+    then
+        break
+    fi
+    echo "Iteration number is ${test}"
+done
+echo "The program skip the loop and program completed."
+#   跳出内部循环
+for (( a=1; a < 4; a++ ))
+do
+    echo "Outer loop: ${a}"
+    for (( b=1; b < 100; b++ ))
+    do
+        if [[ ${b} -eq 5 ]]
+        then
+            break
+        fi
+        echo -e "\tInner loop: ${b}"
+    done
+done
+#   跳出外部循环【break n，中n指定了要跳出的循环层；n为1，表明跳出的是当前的循环】
+for (( a = 1; a < 4; a++))
+do
+    echo "Outer loop: ${a}"
+    for (( b = 1; b < 100; b++ ))
+    do
+        if [[ ${b} -gt 5 ]]
+        then
+            break 2
+        fi
+        echo -e "\tInner loop: ${b}"
+    done
+done
+# ---------------------------------------------------------------------------
+# continue命令
+#   continue命令可以提前中止某次循环中的命令，但并不会完全终止整个循环。
+for (( var11 = 1; var11 < 15; var11++ ))
+do
+    if [[ ${var11} -gt 5 ]] && [[ ${var11} -lt 10 ]]
+    then
+        continue
+    fi
+    echo "Iteration number: ${var11}"
+done
 
 
 # ================================================================================
-# 12. 实例
+# 12. 处理循环的输出
+for path in $PATH
+do
+    if [[ -d "${path}" ]]
+    then
+        echo "${path} is a directory"
+    else
+        echo "${path} is a file"
+    fi
+done >> output.txt
+
+
+# ================================================================================
+# 13. 实例
+#  13.1 查找可执行文件
+#path="../tests/exec_file.txt"
+IFS=:
+for folder in $PATH
+do
+    for file in ${folder}/*
+    do
+        if [[ -x ${file} ]]
+        then
+            echo -e "\t ${file}"
+        fi
+    done
+done
+# 13.2 创建多个用户账户
+#   使用while循环批量创建用户：userid, name(users.csv)
+input='users.csv'
+while IFS=',' read -r userid name
+do
+    echo "adding ${userid}"
+    useradd -c "${name}" -m ${userid}
+done < "${input}"
