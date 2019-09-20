@@ -131,10 +131,141 @@ $ Line #3: This is the third line.
 $ "Do you want to continue [y|n]? " y
 $ WELCOME
 $
-
 # ---------------------------------------------------------------------------------------------
 # 4.4 创建读写文件描述符
 #   也可以打开单个文件描述符来作为输入和输出
 #   用一个文件描述符对同一个文件进行读写
+$ cat testfile44
+$ "This is the first line"
+$ "This is the second line"
+$ "This is the third line"
+#!/bin/bash
+exec 3<>testfile44
+read line<&3
+echo "Read: ${line}"
+echo "*****This is a test line******" >&3
+$ ./test44
+$ "Read: This is the first line"
+$ cat testfile44
+$ "This is the first line"
+$ "*****This is a test line******"
+$ "This is the third line"
 # ---------------------------------------------------------------------------------------------
 # 4.5 关闭文件描述符
+#   创建了新的输入或输出文件描述符，shell会在脚本退出时自动关闭它们。
+#   有情况下，你需要在脚本结束前手动关闭文件描述符。
+#   要关闭文件描述符，将它重定向到特殊符号&-。
+#   一旦关闭了文件描述符，就不能在脚本中向它写入任何数据，否则shell会生成错误消息。
+$ cat test17
+#!/bin/bash
+# testing closing file descriptors
+exec 3> test17file
+echo "This is a test line of data" >&3
+exec 3>&-
+cat test17file
+exec 3> test17file
+echo "This'll be bad" >&3
+$ ./test17
+$ "This is a test line of data"
+$ cat test17file
+$ "This'll be bad"
+
+
+# ==================================================================================
+# 5. 列出打开的文件描述符
+#   lsof命令会列出整个Linux系统打开的所有文件描述符
+#       -p 指定进程ID（PID）
+#       -d 后者允许指定要显示的文件描述符编号
+#       特殊环境变量$$  进程的当前PID，shell会将它设为当前PID
+#       -a选项用来对其他两个选项的结果执行布尔AND运算
+#       当前进程（bash shell）的默认文件描述符（0、1和2）。
+#   lsof的默认输出
+#       COMMAND 正在运行的命令名的前9个字符
+#       PID 进程的PID
+#       USER 进程属主的登录名
+#       FD 文件描述符号以及访问类型（r代表读，w代表写，u代表读写）
+#       TYPE 文件的类型（CHR代表字符型，BLK代表块型，DIR代表目录，REG代表常规文件）
+#       DEVICE 设备的设备号（主设备号和从设备号）
+#       SIZE 如果有的话，表示文件的大小
+#       NODE 本地文件的节点号
+#       NAME 文件名
+which lsof
+
+
+# ==================================================================================
+# 6. 阻止命令输出
+#   将STDERR重定向到一个叫作null文件的特殊文件;null文件的标准位置是/dev/null。你重定向到该位置的任何数据都会被丢掉，不会显示。
+#   同时由于/dev/null为空，可以将其作为输入文件，从而快速清除像有文件中的数据，而不用先删除文件再重新创建
+cat /dev/null > test_null.txt
+
+
+# ==================================================================================
+# 7.创建临时文件
+#       使用/tmp目录来存放不需要永久保留的文件
+#       大多数Linux发行版配置了系统在启动时自动删除/tmp目录的所有文件。
+#       mktemp命令可以在/tmp目录中创建一个唯一的临时文件
+# 7.1 创建本地临时文件
+mktemp testing.XXXXXX       # mktemp命令会用6个字符码替换这6个X，从而保证文件名在目录中是唯一的
+$ cat file71.sh
+#!/bin/bash
+# creating and using a temp file
+tempfile=$( mktemp testing.XXXXXX )
+exec 3>${tempfile}
+echo "This script writes to temp file ${tempfile}"
+echo "This is the first line" >&3
+echo "This is the second line." >&3
+echo "This is the last line." >&3
+exec 3>&-
+echo "Done creating temp file. The contents are:"
+cat ${tempfile}
+rm -f ${tempfile} 2> /dev/null
+# 7.2 在/tmp目录中创建临时文件
+#   -t选项会强制mktemp命令来在系统的临时目录来创建该文件，不管里当前处在那个位置都可以在/tmp/中生成临时文件
+# 7.3 创建临时目录
+#   -d选项告诉mktemp命令来创建一个临时目录而不是临时文件
+$ cat test21
+#!/bin/bash
+# using a temporary directory
+tempdir=$(mktemp -d dir.XXXXXX)
+cd ${tempdir}
+tempfile1=$(mktemp temp.XXXXXX)
+tempfile2=$(mktemp temp.XXXXXX)
+exec 7> ${tempfile1}
+exec 8> ${tempfile2}
+echo "Sending data to directory ${tempdir}"
+echo "This is a test line of data for ${tempfile1}" >&7
+echo "This is a test line of data for ${tempfile2}" >&8
+
+
+# ==================================================================================
+# 8. 记录消息
+#   tee  ---  将输出同时发送到控制台和日志文件
+#             tee命令相当于管道的一个T型接头。它将从STDIN过来的数据同时发往两处。
+#             一处是STDOUT，另一处是tee命令行所指定的文件名
+date | tee test_date_file.txt
+#       想将数据追加到文件中，必须用-a选项
+date | tee -a test_date_file.txt
+
+
+
+# 9. 实例
+# 需求：
+#       可以把数据库数据放入电子表格中
+#       把电子表格保存成.csv格式，
+#       读取文件，
+#       然后创建INSERT语句
+#       将数据插入MySQL数据库
+$ cat test159.sh
+#!/bin/bash
+# read file and create INSERT statements for MySQL
+outfile='members.sql'
+IFS=','
+while read lname fname address city state zip
+do
+    cat >> ${outfile} << EOF
+    INSERT INTO members (lname,fname,address,city,state,zip) VALUES
+    ('${lname}', '${fname}', '${address}', '${city}', '${state}', '${zip}');
+    EOF
+done < ${1}
+
+$ ./test23 < members.csv
