@@ -124,3 +124,106 @@ fi
 $ ./test173.sh
 #$ temp：4 is smaller
 
+
+
+# ===========================================================================
+# 4. 数组变量和函数--------乱七八糟的,,,,,心好乱
+#   4.1 向函数传递数组参数
+$ cat test174.sh
+#!/bin/bash
+function array_func() {
+    echo "The array is $@"
+    local newarray
+    newarray=(; "echo '$@'")
+    echo "The new array value is: ${newarray[*]}"
+}
+myarray=(1 2 3 4 5)
+echo "The original array is ${myarray[*]}"
+array_func ${myarray[*]}
+#   4.2 从函数返回数组
+#   用echo语句来按正确顺序输出单个数组值，然后脚本再将它们重新放进一个新的数组变量中。
+$ cat test174.sh
+#!/bin/bash
+# returning an array value
+function arraydblr {
+ local origarray
+ local newarray
+ local elements
+ local i
+ origarray=($(echo "$@"))
+ newarray=($(echo "$@"))
+ elements=$[ $# - 1 ]
+ for (( i = 0; i <= $elements; i++ ))
+ {
+ newarray[$i]=$[ ${origarray[$i]} * 2 ]
+ }
+ echo ${newarray[*]}
+}
+myarray=(1 2 3 4 5)
+echo "The original array is: ${myarray[*]}"
+arg1=$(echo ${myarray[*]})
+result=($(arraydblr ${arg1}))
+echo "The new array is: ${result[*]}"
+
+
+
+# ===========================================================================
+# 5. 函数递归
+#   局部函数变量的特点是自成体系，除了从脚本命令行处获得变量，自成体系的函数不需要任何的外部资源
+#   这个特性使得函数可以递归调用，也就是函数可以调用自己得到的结果
+$ cat test175.sh
+#!/bin/bash
+function factorial() {
+    if [[ $1 -eq 1 ]]
+    then
+        echo 1
+    else
+        local temp=$[ $1 - 1 ]
+        local_result=`factorial ${temp}`
+        echo $[ ${local_result} * $1 ]
+    fi
+}
+read -p "Enter a value: " value
+result=$(factorial ${value})
+echo "The factorial result is ${result}"
+
+
+
+# ===========================================================================
+# 6.创建库
+#   bash shell允许创建函数库文件，然后在多个脚本中引用该库文件。
+$ cat myfuncs
+# my script functions
+function addem {
+    echo $[ $1 + $2 ]
+}
+function multem {
+    echo $[ $1 * $2 ]
+}
+function divem {
+    if [[ $2 -ne 0 ]]
+    then
+        echo $[ $1 / $2 ]
+    else
+        echo -1
+    fi
+}
+#   source myfuncs(或者 . ./myfuncs )  ---  像普通脚本文件那样运行库文件，函数并不会出现在脚本中。
+
+
+
+# ===========================================================================
+#  7. 在命令行中使用函数
+#  7.1 在命令行中创建函数
+$ function test_single_line_func { echo "采用单行方式定义函数"}
+$ function test_mulit_lines_func{
+    echo $[ $1 + $2 ]
+}
+$ test_mulit_lines_func 2 3
+# ---------------------------------------------------------------------------
+#  7.2 在.bashrc文件中定义函数
+#   在命令行上直接定义shell函数的明显缺点是退出shell时，函数就消失了。
+#   是.bashrc文件。bash shell在每次启动时都会在主目录下查找它，不管是交互式shell还是从现有shell中启动的新shell。
+#   （1）直接在.bashrc文件中定义函数就行，其他不要动
+#   （2）使用source命令读取你的库函数文件到.bashrc中
+
